@@ -61,3 +61,32 @@ def load_allowed_tags(tags_path: Path) -> set[str]:
     with open(tags_path) as f:
         data = yaml.safe_load(f)
     return set(data.get("tags", []))
+
+
+def validate_icon(icon_path: Path) -> list[str]:
+    """Validate an icon.png file. Returns list of error messages."""
+    errors: list[str] = []
+    prefix = str(icon_path)
+
+    try:
+        with open(icon_path, "rb") as f:
+            header = f.read(24)
+    except OSError as e:
+        errors.append(f"{prefix}: could not read file: {e}")
+        return errors
+
+    if len(header) < 24:
+        errors.append(f"{prefix}: file too small to be a valid PNG")
+        return errors
+
+    if header[:8] != PNG_MAGIC:
+        errors.append(f"{prefix}: not a valid PNG (wrong magic bytes)")
+        return errors
+
+    width = struct.unpack(">I", header[16:20])[0]
+    height = struct.unpack(">I", header[20:24])[0]
+
+    if width != 256 or height != 256:
+        errors.append(f"{prefix}: must be 256x256, got {width}x{height}")
+
+    return errors

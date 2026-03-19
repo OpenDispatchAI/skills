@@ -61,3 +61,46 @@ class TestLoadAllowedTags:
         f = tmp_path / "tags.yaml"
         f.write_text(yaml.dump({"tags": ["a", "b"]}))
         assert load_allowed_tags(f) == {"a", "b"}
+
+
+def _make_png(width=256, height=256):
+    """Create minimal PNG bytes with given dimensions."""
+    magic = b"\x89PNG\r\n\x1a\n"
+    ihdr_data = struct.pack(">II", width, height) + b"\x08\x02\x00\x00\x00"
+    ihdr_length = struct.pack(">I", len(ihdr_data))
+    ihdr_type = b"IHDR"
+    ihdr_crc = b"\x00\x00\x00\x00"
+    return magic + ihdr_length + ihdr_type + ihdr_data + ihdr_crc
+
+
+class TestValidateIcon:
+    def test_valid_png(self, tmp_path):
+        from validate import validate_icon
+
+        icon = tmp_path / "icon.png"
+        icon.write_bytes(_make_png())
+        assert validate_icon(icon) == []
+
+    def test_wrong_magic_bytes(self, tmp_path):
+        from validate import validate_icon
+
+        icon = tmp_path / "icon.png"
+        icon.write_bytes(b"\x00" * 24)
+        errors = validate_icon(icon)
+        assert any("magic bytes" in e for e in errors)
+
+    def test_wrong_dimensions(self, tmp_path):
+        from validate import validate_icon
+
+        icon = tmp_path / "icon.png"
+        icon.write_bytes(_make_png(128, 128))
+        errors = validate_icon(icon)
+        assert any("256x256" in e for e in errors)
+
+    def test_file_too_small(self, tmp_path):
+        from validate import validate_icon
+
+        icon = tmp_path / "icon.png"
+        icon.write_bytes(b"\x89PNG")
+        errors = validate_icon(icon)
+        assert any("too small" in e for e in errors)
