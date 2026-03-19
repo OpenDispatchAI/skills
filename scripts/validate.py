@@ -286,3 +286,77 @@ def validate_parameter(ctx: str, index: int, param: Any) -> list[str]:
         errors.append(f"{pctx}: 'required' must be a boolean")
 
     return errors
+
+
+def main() -> int:
+    """Main entry point. Returns 0 on success, 1 on validation errors."""
+    repo_root = Path(os.environ.get("GITHUB_WORKSPACE", ".")).resolve()
+    tags_path = repo_root / "tags.yaml"
+    skills_dir = repo_root / "skills"
+
+    all_errors: list[str] = []
+
+    # 1. Validate tags.yaml
+    all_errors.extend(validate_tags_file(tags_path))
+
+    # Load allowed tags for cross-referencing
+    allowed_tags: set[str] = set()
+    if tags_path.exists() and not all_errors:
+        allowed_tags = load_allowed_tags(tags_path)
+
+    # 2. Validate each skill
+    skill_ids: dict[str, str] = {}  # skill_id -> folder path
+
+    if skills_dir.is_dir():
+        for skill_dir in sorted(skills_dir.iterdir()):
+            if not skill_dir.is_dir() or skill_dir.name.startswith("."):
+                continue
+
+            skill_yaml = skill_dir / "skill.yaml"
+            if not skill_yaml.exists():
+                all_errors.append(f"{skill_dir}: missing skill.yaml")
+                continue
+
+            folder_name = skill_dir.name
+            all_errors.extend(
+                validate_skill_yaml(skill_yaml, folder_name, allowed_tags)
+            )
+
+            # Duplicate skill_id check
+            try:
+                with open(skill_yaml) as f:
+                    data = yaml.safe_load(f)
+                if isinstance(data, dict) and "skill_id" in data:
+                    sid = data["skill_id"]
+                    if sid in skill_ids:
+                        all_errors.append(
+                            f"{skill_yaml}: duplicate skill_id '{sid}' "
+                            f"(also in {skill_ids[sid]})"
+                        )
+                    else:
+                        skill_ids[sid] = str(skill_yaml)
+            except Exception:
+                pass  # YAML errors already reported above
+
+            # 3. Validate icon if present
+            icon_path = skill_dir / "icon.png"
+            if icon_path.exists():
+                all_errors.extend(validate_icon(icon_path))
+
+    # Output errors as GitHub Actions annotations
+    for error in all_errors:
+        # Extract file path for annotation
+        colon_idx = error.find(": ", 1)
+        file_path = error[:colon_idx] if colon_idx > 0 else ""
+        print(f"::error file={file_path}::{error}")
+
+    if all_errors:
+        print(f"\n{len(all_errors)} validation error(s) found.")
+        return 1
+
+    print("All validations passed.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

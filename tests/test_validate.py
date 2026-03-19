@@ -302,3 +302,76 @@ class TestValidateParameter:
 
         errors = validate_parameter("ctx", 0, {"name": "p", "type": "s", "required": "yes"})
         assert any("boolean" in e for e in errors)
+
+
+class TestMain:
+    def _setup_repo(self, tmp_path):
+        """Create a minimal valid repo structure in tmp_path."""
+        tags = tmp_path / "tags.yaml"
+        tags.write_text(yaml.dump({"tags": ["smart-home"]}))
+
+        skill_dir = tmp_path / "skills" / "test-skill"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "skill.yaml").write_text(
+            yaml.dump(_valid_skill(), default_flow_style=False)
+        )
+        return tmp_path
+
+    def test_valid_repo_passes(self, tmp_path, monkeypatch):
+        from validate import main
+
+        self._setup_repo(tmp_path)
+        monkeypatch.setenv("GITHUB_WORKSPACE", str(tmp_path))
+        assert main() == 0
+
+    def test_invalid_skill_fails(self, tmp_path, monkeypatch):
+        from validate import main
+
+        self._setup_repo(tmp_path)
+        # Break the skill
+        skill_yaml = tmp_path / "skills" / "test-skill" / "skill.yaml"
+        skill_yaml.write_text(yaml.dump({"skill_id": "test-skill"}))
+        monkeypatch.setenv("GITHUB_WORKSPACE", str(tmp_path))
+        assert main() == 1
+
+    def test_duplicate_skill_ids(self, tmp_path, monkeypatch):
+        from validate import main
+
+        self._setup_repo(tmp_path)
+        # Add second skill with same skill_id
+        dup_dir = tmp_path / "skills" / "duplicate"
+        dup_dir.mkdir()
+        dup_skill = _valid_skill()
+        dup_skill["skill_id"] = "test-skill"  # same id, different folder
+        (dup_dir / "skill.yaml").write_text(
+            yaml.dump(dup_skill, default_flow_style=False)
+        )
+        monkeypatch.setenv("GITHUB_WORKSPACE", str(tmp_path))
+        assert main() == 1
+
+    def test_invalid_icon_fails(self, tmp_path, monkeypatch):
+        from validate import main
+
+        self._setup_repo(tmp_path)
+        icon = tmp_path / "skills" / "test-skill" / "icon.png"
+        icon.write_bytes(b"not a png at all, definitely not")
+        monkeypatch.setenv("GITHUB_WORKSPACE", str(tmp_path))
+        assert main() == 1
+
+    def test_valid_icon_passes(self, tmp_path, monkeypatch):
+        from validate import main
+
+        self._setup_repo(tmp_path)
+        icon = tmp_path / "skills" / "test-skill" / "icon.png"
+        icon.write_bytes(_make_png(256, 256))
+        monkeypatch.setenv("GITHUB_WORKSPACE", str(tmp_path))
+        assert main() == 0
+
+    def test_missing_skill_yaml(self, tmp_path, monkeypatch):
+        from validate import main
+
+        self._setup_repo(tmp_path)
+        # Add a directory without skill.yaml
+        (tmp_path / "skills" / "empty-skill").mkdir()
+        monkeypatch.setenv("GITHUB_WORKSPACE", str(tmp_path))
+        assert main() == 1
