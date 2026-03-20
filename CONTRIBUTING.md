@@ -132,7 +132,7 @@ Adding an icon is optional but recommended. If you include one, it must meet the
 Before opening a pull request, you can run the validation script locally to catch errors early:
 
 ```bash
-pip install pyyaml && python scripts/validate.py
+pip install pyyaml jsonschema && python scripts/validate.py
 ```
 
 The script checks all skill folders under `skills/` and verifies:
