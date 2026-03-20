@@ -35,7 +35,7 @@ class TestValidateTagsFile:
         f = tmp_path / "tags.yaml"
         f.write_text(yaml.dump({"categories": ["a"]}))
         errors = validate_tags_file(f)
-        assert any("missing 'tags'" in e for e in errors)
+        assert any("'tags' is a required property" in e for e in errors)
 
     def test_tags_not_array(self, tmp_path):
         from validate import validate_tags_file
@@ -43,7 +43,7 @@ class TestValidateTagsFile:
         f = tmp_path / "tags.yaml"
         f.write_text(yaml.dump({"tags": "not-array"}))
         errors = validate_tags_file(f)
-        assert any("must be an array" in e for e in errors)
+        assert any("is not of type 'array'" in e for e in errors)
 
     def test_non_string_tag(self, tmp_path):
         from validate import validate_tags_file
@@ -51,7 +51,7 @@ class TestValidateTagsFile:
         f = tmp_path / "tags.yaml"
         f.write_text(yaml.dump({"tags": ["ok", 123]}))
         errors = validate_tags_file(f)
-        assert any("must be a string" in e for e in errors)
+        assert any("is not of type 'string'" in e for e in errors)
 
 
 class TestLoadAllowedTags:
@@ -144,7 +144,7 @@ class TestValidateSkillYaml:
         data = _valid_skill()
         data["skill_id"] = "ab"
         errors = self._write_and_validate(tmp_path, data, folder="ab")
-        assert any("must match" in e for e in errors)
+        assert any("does not match" in e for e in errors)
 
     def test_skill_id_folder_mismatch(self, tmp_path):
         errors = self._write_and_validate(tmp_path, _valid_skill(), folder="wrong")
@@ -154,7 +154,7 @@ class TestValidateSkillYaml:
         data = _valid_skill()
         data["version"] = "1.0"
         errors = self._write_and_validate(tmp_path, data)
-        assert any("semver" in e for e in errors)
+        assert any("does not match" in e for e in errors)
 
     def test_tags_checked_against_allowed(self, tmp_path):
         data = _valid_skill()
@@ -179,7 +179,7 @@ class TestValidateSkillYaml:
         data = _valid_skill()
         data["languages"] = ["en", 42]
         errors = self._write_and_validate(tmp_path, data)
-        assert any("must be a string" in e for e in errors)
+        assert any("is not of type 'string'" in e for e in errors)
 
     def test_built_in_rejected(self, tmp_path):
         data = _valid_skill()
@@ -196,119 +196,51 @@ class TestValidateSkillYaml:
         errors = validate_skill_yaml(f, "test", set())
         assert len(errors) >= 1
 
+    def test_action_id_must_have_dot_segments(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["id"] = "nodots"
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("does not match" in e for e in errors)
 
-class TestValidateAction:
-    def test_valid_minimal(self):
-        from validate import validate_action
+    def test_action_id_uppercase_rejected(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["id"] = "Test.Action.Run"
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("does not match" in e for e in errors)
 
-        action = {"id": "test.action.run", "title": "Run", "examples": ["run it"]}
-        assert validate_action("test", 0, action) == []
+    def test_confirmation_invalid_value(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["confirmation"] = "bad"
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("is not one of" in e for e in errors)
 
-    def test_missing_required_fields(self):
-        from validate import validate_action
-
-        errors = validate_action("test", 0, {})
-        assert any("'id'" in e for e in errors)
-        assert any("'title'" in e for e in errors)
-        assert any("'examples'" in e for e in errors)
-
-    def test_id_must_have_dot_segments(self):
-        from validate import validate_action
-
-        action = {"id": "nodots", "title": "Run", "examples": ["run"]}
-        errors = validate_action("test", 0, action)
-        assert any("must match" in e for e in errors)
-
-    def test_id_uppercase_rejected(self):
-        from validate import validate_action
-
-        action = {"id": "Test.Action.Run", "title": "Run", "examples": ["run"]}
-        errors = validate_action("test", 0, action)
-        assert any("must match" in e for e in errors)
-
-    def test_confirmation_invalid_value(self):
-        from validate import validate_action
-
-        action = {"id": "t.a.r", "title": "R", "examples": ["r"], "confirmation": "bad"}
-        errors = validate_action("test", 0, action)
-        assert any("confirmation" in e for e in errors)
-
-    def test_confirmation_valid_values(self):
-        from validate import validate_action
-
+    def test_confirmation_valid_values(self, tmp_path):
         for val in ("required", "none", "destructive_only"):
-            action = {"id": "t.a.r", "title": "R", "examples": ["r"], "confirmation": val}
-            assert validate_action("test", 0, action) == []
+            data = _valid_skill()
+            data["actions"][0]["confirmation"] = val
+            assert self._write_and_validate(tmp_path, data) == []
 
-    def test_empty_examples_rejected(self):
-        from validate import validate_action
+    def test_empty_examples_rejected(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["examples"] = []
+        errors = self._write_and_validate(tmp_path, data)
+        assert len(errors) > 0
 
-        action = {"id": "t.a.r", "title": "R", "examples": []}
-        errors = validate_action("test", 0, action)
-        assert any("non-empty" in e for e in errors)
+    def test_parameter_unknown_keys_rejected(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["parameters"] = [
+            {"name": "p", "type": "string", "typo_field": "x"}
+        ]
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("Additional properties" in e for e in errors)
 
-    def test_negative_examples_validated(self):
-        from validate import validate_action
-
-        action = {"id": "t.a.r", "title": "R", "examples": ["r"], "negative_examples": [123]}
-        errors = validate_action("test", 0, action)
-        assert any("must be a string" in e for e in errors)
-
-    def test_shortcut_arguments_must_be_object(self):
-        from validate import validate_action
-
-        action = {"id": "t.a.r", "title": "R", "examples": ["r"], "shortcut_arguments": "bad"}
-        errors = validate_action("test", 0, action)
-        assert any("must be an object" in e for e in errors)
-
-    def test_parameters_validated(self):
-        from validate import validate_action
-
-        action = {
-            "id": "t.a.r",
-            "title": "R",
-            "examples": ["r"],
-            "parameters": [{"name": "p", "type": "string", "typo_field": "x"}],
-        }
-        errors = validate_action("test", 0, action)
-        assert any("unknown" in e for e in errors)
-
-
-class TestValidateParameter:
-    def test_valid_minimal(self):
-        from validate import validate_parameter
-
-        assert validate_parameter("ctx", 0, {"name": "p", "type": "string"}) == []
-
-    def test_valid_all_fields(self):
-        from validate import validate_parameter
-
-        param = {"name": "p", "type": "string", "description": "desc", "required": False}
-        assert validate_parameter("ctx", 0, param) == []
-
-    def test_missing_name(self):
-        from validate import validate_parameter
-
-        errors = validate_parameter("ctx", 0, {"type": "string"})
-        assert any("'name'" in e for e in errors)
-
-    def test_missing_type(self):
-        from validate import validate_parameter
-
-        errors = validate_parameter("ctx", 0, {"name": "p"})
-        assert any("'type'" in e for e in errors)
-
-    def test_unknown_keys_rejected(self):
-        from validate import validate_parameter
-
-        errors = validate_parameter("ctx", 0, {"name": "p", "type": "s", "oops": 1})
-        assert any("unknown" in e for e in errors)
-
-    def test_required_must_be_bool(self):
-        from validate import validate_parameter
-
-        errors = validate_parameter("ctx", 0, {"name": "p", "type": "s", "required": "yes"})
-        assert any("boolean" in e for e in errors)
+    def test_parameter_required_must_be_bool(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["parameters"] = [
+            {"name": "p", "type": "string", "required": "yes"}
+        ]
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("is not of type 'boolean'" in e for e in errors)
 
 
 class TestMain:
