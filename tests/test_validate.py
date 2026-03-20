@@ -181,6 +181,13 @@ class TestValidateSkillYaml:
         errors = self._write_and_validate(tmp_path, data)
         assert any("must be a string" in e for e in errors)
 
+    def test_built_in_rejected(self, tmp_path):
+        data = _valid_skill()
+        data["built_in"] = True
+        errors = self._write_and_validate(tmp_path, data)
+        assert len(errors) > 0
+        assert any("built_in" in e for e in errors)
+
     def test_invalid_yaml(self, tmp_path):
         from validate import validate_skill_yaml
 
