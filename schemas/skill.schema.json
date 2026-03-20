@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenDispatch Skill",
+  "description": "Skill definition for the OpenDispatch marketplace",
+  "type": "object",
+  "required": ["skill_id", "name", "version", "description", "author", "actions"],
+  "additionalProperties": false,
+  "properties": {
+    "skill_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{3,}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "author_url": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "bridge_shortcut": {
+      "type": "string"
+    },
+    "bridge_shortcut_share_url": {
+      "type": "string"
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    }
+  },
+  "if": {
+    "required": ["bridge_shortcut"]
+  },
+  "then": {
+    "required": ["bridge_shortcut_share_url"]
+  },
+  "$defs": {
+    "action": {
+      "type": "object",
+      "required": ["id", "title", "examples"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "negative_examples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "confirmation": {
+          "type": "string",
+          "enum": ["required", "none", "destructive_only"]
+        },
+        "shortcut_arguments": {
+          "type": "object"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/parameter"
+          }
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
