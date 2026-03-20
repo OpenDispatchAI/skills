@@ -242,6 +242,18 @@ class TestValidateSkillYaml:
         errors = self._write_and_validate(tmp_path, data)
         assert any("is not of type 'boolean'" in e for e in errors)
 
+    def test_negative_examples_non_string_rejected(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["negative_examples"] = [123]
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("is not of type 'string'" in e for e in errors)
+
+    def test_shortcut_arguments_must_be_object(self, tmp_path):
+        data = _valid_skill()
+        data["actions"][0]["shortcut_arguments"] = "bad"
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("is not of type 'object'" in e for e in errors)
+
 
 class TestMain:
     def _setup_repo(self, tmp_path):
