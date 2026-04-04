@@ -3,9 +3,7 @@ name: Tesla
 version: 1.0.0
 author: OpenDispatch
 tags:
-  - car
   - automotive
-  - todofix
 description: "Full implementation of the official Tesla app for controlling your car via OpenDispatch."
 bridge_shortcut: "OpenDispatch - Tesla V1"
 bridge_shortcut_source: "OpenDispatch - Tesla V1.cherri"
