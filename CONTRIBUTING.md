@@ -44,7 +44,8 @@ Every skill is defined by a single `skill.yaml` file. Below is the complete sche
 | `tags` | No | array of strings | Each tag must exist in the repository's `tags.yaml` file. |
 | `languages` | No | array of strings | Languages the skill supports (e.g., `["en", "nl"]`). |
 | `bridge_shortcut` | No | string | Name of the Apple Shortcut used as a bridge. |
-| `bridge_shortcut_share_url` | No | string | Required if `bridge_shortcut` is set. The iCloud share URL for the shortcut. |
+| `bridge_shortcut_share_url` | No | string | iCloud share URL for the shortcut. Required if `bridge_shortcut` is set and `bridge_shortcut_source` is not provided. Mutually exclusive with `bridge_shortcut_source`. |
+| `bridge_shortcut_source` | No | string | Filename of a [Cherri](https://cherrilang.org/) source file (must end in `.cherri`) in the skill folder. The filename without the `.cherri` extension **must match** the `bridge_shortcut` value exactly (e.g., if `bridge_shortcut` is `"My Shortcut"`, the source must be `"My Shortcut.cherri"`). The shortcut will be compiled and signed automatically. Required if `bridge_shortcut` is set and `bridge_shortcut_share_url` is not provided. Mutually exclusive with `bridge_shortcut_share_url`. |
 | `actions` | Yes | array | Non-empty array of action objects (see below). |
 
 ### Action Fields
@@ -144,6 +145,10 @@ The script checks all skill folders under `skills/` and verifies:
 - `tags` (if any) exist in `tags.yaml`
 - Action IDs match the required pattern
 - Each action has `examples`
+- `bridge_shortcut_source` file exists in the skill folder
+- `bridge_shortcut_source` filename matches `bridge_shortcut` value
+- `bridge_shortcut` has exactly one of `bridge_shortcut_share_url` or `bridge_shortcut_source`
+- `icon.png` (if present) is a valid 256x256 PNG
 
 ---
 

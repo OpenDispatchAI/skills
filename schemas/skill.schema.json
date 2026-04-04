@@ -47,6 +47,10 @@
     "bridge_shortcut_share_url": {
       "type": "string"
     },
+    "bridge_shortcut_source": {
+      "type": "string",
+      "pattern": "\\.cherri$"
+    },
     "actions": {
       "type": "array",
       "minItems": 1,
@@ -59,7 +63,16 @@
     "required": ["bridge_shortcut"]
   },
   "then": {
-    "required": ["bridge_shortcut_share_url"]
+    "oneOf": [
+      {
+        "required": ["bridge_shortcut_share_url"],
+        "not": { "required": ["bridge_shortcut_source"] }
+      },
+      {
+        "required": ["bridge_shortcut_source"],
+        "not": { "required": ["bridge_shortcut_share_url"] }
+      }
+    ]
   },
   "$defs": {
     "action": {

@@ -1,0 +1,239 @@
+#include 'actions/scripting'
+
+#define color purple
+#define glyph car
+
+comment('OpenDispatch - Tesla V1. Scroll down and tap Add Shortcut to install. If you want to change the default car you can do so after installing.')
+
+const Input = getDictionary(ShortcutInput)
+const Action = getValue(Input, "action")
+
+// Lock & Unlock
+if Action['Name'] == "vehicle.unlock" {
+	rawAction("com.teslamotors.TeslaApp.LockUnlockIntent", {
+		"ShowWhenRun": false,
+		"vehicleControlType": "unlock"
+	})
+}
+
+if Action['Name'] == "vehicle.lock" {
+	rawAction("com.teslamotors.TeslaApp.LockUnlockIntent", {
+		"ShowWhenRun": false,
+		"vehicleControlType": "lock"
+	})
+}
+
+// Horn & Lights
+if Action['Name'] == "vehicle.horn" {
+	rawAction("com.teslamotors.TeslaApp.HonkIntent", {
+		"ShowWhenRun": false
+	})
+}
+
+if Action['Name'] == "vehicle.flash_lights" {
+	rawAction("com.teslamotors.TeslaApp.FlashLightIntent", {
+		"ShowWhenRun": false
+	})
+}
+
+// Climate
+if Action['Name'] == "vehicle.climate.start" {
+	rawAction("com.teslamotors.TeslaApp.PreconditionIntent", {
+		"ShowWhenRun": false,
+		"preconditionAction": "start"
+	})
+}
+
+if Action['Name'] == "vehicle.climate.stop" {
+	rawAction("com.teslamotors.TeslaApp.PreconditionIntent", {
+		"ShowWhenRun": false,
+		"preconditionAction": "stop"
+	})
+}
+
+if Action['Name'] == "vehicle.climate.set_temperature" {
+	@temperature = Input['temperature']
+	rawAction("com.teslamotors.TeslaApp.HVACSetTempIntent", {
+		"ShowWhenRun": false,
+		"temperature": {
+			"Value": {
+				"Magnitude": {
+					"Type": "Variable",
+					"VariableName": "temperature"
+				},
+				"Unit": "°C"
+			},
+			"WFSerializationType": "WFQuantityFieldValue"
+		}
+	})
+}
+
+if Action['Name'] == "vehicle.climate.seat_heater" {
+	@seat = Input['seat']
+	@level = Input['level']
+	rawAction("com.teslamotors.TeslaApp.HVACSeatHeaterIntent", {
+		"ShowWhenRun": false,
+		"seat": "${seat}",
+		"level": "${level}"
+	})
+}
+
+if Action['Name'] == "vehicle.defrost.start" {
+	rawAction("com.teslamotors.TeslaApp.DefrostIntent", {
+		"ShowWhenRun": false,
+		"defrostAction": "enable"
+	})
+}
+
+if Action['Name'] == "vehicle.defrost.stop" {
+	rawAction("com.teslamotors.TeslaApp.DefrostIntent", {
+		"ShowWhenRun": false,
+		"defrostAction": "disable"
+	})
+}
+
+// Windows
+if Action['Name'] == "vehicle.vent_windows" {
+	rawAction("com.teslamotors.TeslaApp.VentIntent", {
+		"ShowWhenRun": false
+	})
+}
+
+if Action['Name'] == "vehicle.close_windows" {
+	rawAction("com.teslamotors.TeslaApp.CloseWindowIntent", {
+		"ShowWhenRun": false
+	})
+}
+
+// Trunk & Frunk
+if Action['Name'] == "vehicle.trunk.open" {
+	rawAction("com.teslamotors.TeslaApp.RearTrunkIntent", {
+		"ShowWhenRun": false,
+		"rearTrunkAction": "open"
+	})
+}
+
+if Action['Name'] == "vehicle.frunk.open" {
+	rawAction("com.teslamotors.TeslaApp.FrontTrunkIntent", {
+		"ShowWhenRun": false
+	})
+}
+
+// Charging
+if Action['Name'] == "vehicle.charge.start" {
+	rawAction("com.teslamotors.TeslaApp.ChargingIntent", {
+		"ShowWhenRun": false,
+		"chargeAction": "start"
+	})
+}
+
+if Action['Name'] == "vehicle.charge.stop" {
+	rawAction("com.teslamotors.TeslaApp.ChargingIntent", {
+		"ShowWhenRun": false,
+		"chargeAction": "stop"
+	})
+}
+
+if Action['Name'] == "vehicle.charge.set_limit" {
+	@limit = Input['limit']
+	rawAction("com.teslamotors.TeslaApp.ChargeLimitIntent", {
+		"ShowWhenRun": false,
+		"percent": "${limit}"
+	})
+}
+
+if Action['Name'] == "vehicle.charge.set_current" {
+	@amps = Input['amps']
+	rawAction("com.teslamotors.TeslaApp.ChargeCurrentIntent", {
+		"ShowWhenRun": false,
+		"amps": "${amps}"
+	})
+}
+
+if Action['Name'] == "vehicle.charge_port.open" {
+	rawAction("com.teslamotors.TeslaApp.ChargePortIntent", {
+		"ShowWhenRun": false,
+		"chargePortAction": "open"
+	})
+}
+
+if Action['Name'] == "vehicle.charge_port.close" {
+	rawAction("com.teslamotors.TeslaApp.ChargePortIntent", {
+		"ShowWhenRun": false,
+		"chargePortAction": "close"
+	})
+}
+
+// Sentry Mode
+if Action['Name'] == "vehicle.sentry.enable" {
+	rawAction("com.teslamotors.TeslaApp.SentryModeIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "enable"
+	})
+}
+
+if Action['Name'] == "vehicle.sentry.disable" {
+	rawAction("com.teslamotors.TeslaApp.SentryModeIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "disable"
+	})
+}
+
+// Media
+if Action['Name'] == "vehicle.media.set_volume" {
+	@percent = Input['percent']
+	rawAction("com.teslamotors.TeslaApp.MediaVolumeIntent", {
+		"ShowWhenRun": false,
+		"percent": "${percent}"
+	})
+}
+
+// Modes
+if Action['Name'] == "vehicle.dog_mode.enable" {
+	rawAction("com.teslamotors.TeslaApp.DogModeIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "enable"
+	})
+}
+
+if Action['Name'] == "vehicle.dog_mode.disable" {
+	rawAction("com.teslamotors.TeslaApp.DogModeIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "disable"
+	})
+}
+
+if Action['Name'] == "vehicle.camp_mode.enable" {
+	rawAction("com.teslamotors.TeslaApp.CampModeIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "enable"
+	})
+}
+
+if Action['Name'] == "vehicle.camp_mode.disable" {
+	rawAction("com.teslamotors.TeslaApp.CampModeIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "disable"
+	})
+}
+
+if Action['Name'] == "vehicle.bioweapon_defense.enable" {
+	rawAction("com.teslamotors.TeslaApp.BioweaponIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "enable"
+	})
+}
+
+if Action['Name'] == "vehicle.bioweapon_defense.disable" {
+	rawAction("com.teslamotors.TeslaApp.BioweaponIntent", {
+		"ShowWhenRun": false,
+		"vehicleModeAction": "disable"
+	})
+}
+
+// Fun
+if Action['Name'] == "vehicle.fart" {
+	rawAction("com.teslamotors.TeslaApp.FartIntent", {
+		"ShowWhenRun": false
+	})
+}

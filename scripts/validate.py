@@ -106,6 +106,26 @@ def validate_skill_yaml(
                 f"{prefix}: 'skill_id' ('{skill_id}') must match folder name ('{folder_name}')"
             )
 
+    # Cross-file: bridge_shortcut_source must reference an existing .cherri file
+    source = data.get("bridge_shortcut_source")
+    if isinstance(source, str) and source.strip():
+        cherri_path = skill_path.parent / source
+        if not cherri_path.exists():
+            errors.append(
+                f"{prefix}: bridge_shortcut_source references '{source}' "
+                f"but the file does not exist"
+            )
+
+        # The .cherri filename (without extension) must match bridge_shortcut
+        shortcut_name = data.get("bridge_shortcut")
+        if isinstance(shortcut_name, str) and shortcut_name.strip():
+            expected_source = f"{shortcut_name}.cherri"
+            if source != expected_source:
+                errors.append(
+                    f"{prefix}: bridge_shortcut_source ('{source}') must match "
+                    f"bridge_shortcut name ('{shortcut_name}.cherri')"
+                )
+
     # Cross-file: tags must exist in tags.yaml
     if "tags" in data and isinstance(data["tags"], list):
         for i, tag in enumerate(data["tags"]):

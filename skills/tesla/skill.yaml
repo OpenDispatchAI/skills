@@ -1,0 +1,403 @@
+skill_id: tesla
+name: Tesla
+version: 1.0.0
+author: OpenDispatch
+tags:
+  - car
+  - automotive
+  - todofix
+description: "Full implementation of the official Tesla app for controlling your car via OpenDispatch."
+bridge_shortcut: "OpenDispatch - Tesla V1"
+bridge_shortcut_source: "OpenDispatch - Tesla V1.cherri"
+
+actions:
+  - id: vehicle.unlock
+    title: "Unlock"
+    description: "Unlock your Tesla vehicle"
+    shortcut_arguments:
+      action: vehicle.unlock
+      vehicle: default
+    examples:
+      - unlock my car
+      - unlock the tesla
+      - unlock my tesla
+      - open the car
+      - open my tesla
+    negative_examples:
+      - open the windows
+      - open the car windows
+
+  - id: vehicle.lock
+    title: "Lock"
+    description: "Lock your Tesla vehicle"
+    shortcut_arguments:
+      action: vehicle.lock
+      vehicle: default
+    examples:
+      - lock my car
+      - lock the tesla
+      - lock my tesla
+      - secure the car
+    negative_examples:
+        - close the windows
+        - close the car windows
+
+  - id: vehicle.climate.start
+    title: "Start Climate"
+    description: "Turn on the Tesla climate control to pre-condition the cabin"
+    shortcut_arguments:
+      action: vehicle.climate.start
+      vehicle: default
+    examples:
+      - turn on the car ac
+      - start tesla climate
+      - precondition the car
+      - warm up the car
+      - cool down the tesla
+      - turn on the airco
+      - heat the car
+
+  - id: vehicle.climate.stop
+    title: "Stop Climate"
+    description: "Turn off the Tesla climate control"
+    shortcut_arguments:
+      action: vehicle.climate.stop
+      vehicle: default
+    examples:
+      - turn off the car ac
+      - stop tesla climate
+      - stop heating the car
+      - turn off the airco
+
+  - id: vehicle.climate.set_temperature
+    title: "Set Temperature"
+    description: "Set the Tesla cabin temperature"
+    shortcut_arguments:
+      action: vehicle.climate.set_temperature
+      vehicle: default
+      temperature: "{{temperature}}"
+    parameters:
+      - name: temperature
+        type: number
+        description: "Target temperature in degrees"
+        required: true
+    examples:
+      - set the car to 21 degrees
+      - make the tesla 19 degrees
+      - set cabin temperature to 22
+      - car temperature 20
+
+  - id: vehicle.horn
+    title: "Honk Horn"
+    description: "Sound the Tesla horn"
+    shortcut_arguments:
+      action: vehicle.horn
+      vehicle: default
+    examples:
+      - honk the horn
+      - honk my tesla
+      - beep the car
+      - sound the horn
+      - find my car
+
+  - id: vehicle.flash_lights
+    title: "Flash Lights"
+    description: "Flash the Tesla headlights"
+    shortcut_arguments:
+      action: vehicle.flash_lights
+      vehicle: default
+    examples:
+      - flash the lights
+      - flash my tesla
+      - blink the car lights
+      - flash headlights
+
+  - id: vehicle.trunk.open
+    title: "Open Trunk"
+    description: "Open the Tesla rear trunk"
+    shortcut_arguments:
+      action: vehicle.trunk.open
+      vehicle: default
+    examples:
+      - open the trunk
+      - pop the trunk
+      - open tesla trunk
+      - open the boot
+
+  - id: vehicle.frunk.open
+    title: "Open Frunk"
+    description: "Open the Tesla front trunk (frunk)"
+    shortcut_arguments:
+      action: vehicle.frunk.open
+      vehicle: default
+    examples:
+      - open the frunk
+      - open front trunk
+      - pop the frunk
+      - open tesla frunk
+
+  - id: vehicle.charge.start
+    title: "Start Charging"
+    description: "Start charging the Tesla"
+    shortcut_arguments:
+      action: vehicle.charge.start
+      vehicle: default
+    examples:
+      - start charging
+      - charge the tesla
+      - start charging the car
+      - plug in and charge
+
+  - id: vehicle.charge.stop
+    title: "Stop Charging"
+    description: "Stop charging the Tesla"
+    shortcut_arguments:
+      action: vehicle.charge.stop
+      vehicle: default
+    examples:
+      - stop charging
+      - stop charging the tesla
+      - stop charging the car
+
+  - id: vehicle.charge.set_limit
+    title: "Set Charge Limit"
+    description: "Set the Tesla charge limit percentage"
+    shortcut_arguments:
+      action: vehicle.charge.set_limit
+      vehicle: default
+      limit: "{{limit}}"
+    parameters:
+      - name: limit
+        type: number
+        description: "Charge limit percentage (50-100)"
+        required: true
+    examples:
+      - set charge limit to 80
+      - charge to 90 percent
+      - limit charging to 80
+
+  - id: vehicle.sentry.enable
+    title: "Enable Sentry Mode"
+    description: "Turn on Tesla Sentry Mode"
+    shortcut_arguments:
+      action: vehicle.sentry.enable
+      vehicle: default
+    examples:
+      - turn on sentry mode
+      - enable sentry
+      - activate sentry mode
+      - sentry on
+
+  - id: vehicle.sentry.disable
+    title: "Disable Sentry Mode"
+    description: "Turn off Tesla Sentry Mode"
+    shortcut_arguments:
+      action: vehicle.sentry.disable
+      vehicle: default
+    examples:
+      - turn off sentry mode
+      - disable sentry
+      - sentry off
+
+  - id: vehicle.vent_windows
+    title: "Vent Windows"
+    description: "Vent the Tesla windows slightly for cooling"
+    shortcut_arguments:
+      action: vehicle.vent_windows
+      vehicle: default
+    examples:
+      - vent the windows
+      - crack the windows
+      - open the windows a little
+      - vent tesla windows
+
+  - id: vehicle.close_windows
+    title: "Close Windows"
+    description: "Close all Tesla windows"
+    shortcut_arguments:
+      action: vehicle.close_windows
+      vehicle: default
+    examples:
+      - close the windows
+      - close all windows
+      - shut the windows
+      - close tesla windows
+
+  - id: vehicle.climate.seat_heater
+    title: "Set Seat Heater"
+    description: "Control the Tesla seat heater"
+    shortcut_arguments:
+      action: vehicle.climate.seat_heater
+      vehicle: default
+    parameters:
+      - name: seat
+        type: string
+        description: "Which seat (frontLeft, frontRight, rearLeft, rearCenter, rearRight)"
+        required: true
+      - name: level
+        type: string
+        description: "Heater level (off, low, medium, high)"
+        required: true
+    examples:
+      - heat my seat
+      - turn on the seat heater
+      - warm up the driver seat
+      - set passenger seat heater to high
+      - turn off the seat heater
+
+  - id: vehicle.defrost.start
+    title: "Start Defrost"
+    description: "Turn on the Tesla windshield defrost"
+    shortcut_arguments:
+      action: vehicle.defrost.start
+      vehicle: default
+    examples:
+      - turn on defrost
+      - start defrosting
+      - defrost the windshield
+      - defrost the car
+
+  - id: vehicle.defrost.stop
+    title: "Stop Defrost"
+    description: "Turn off the Tesla windshield defrost"
+    shortcut_arguments:
+      action: vehicle.defrost.stop
+      vehicle: default
+    examples:
+      - turn off defrost
+      - stop defrosting
+      - defrost off
+
+  - id: vehicle.charge.set_current
+    title: "Set Charge Current"
+    description: "Set the Tesla charging current in amps"
+    shortcut_arguments:
+      action: vehicle.charge.set_current
+      vehicle: default
+    parameters:
+      - name: amps
+        type: number
+        description: "Charging current in amps"
+        required: true
+    examples:
+      - set charging to 16 amps
+      - charge at 10 amps
+      - set charge current to 32
+
+  - id: vehicle.charge_port.open
+    title: "Open Charge Port"
+    description: "Open the Tesla charge port"
+    shortcut_arguments:
+      action: vehicle.charge_port.open
+      vehicle: default
+    examples:
+      - open the charge port
+      - open charge port
+      - unlock the charger
+
+  - id: vehicle.charge_port.close
+    title: "Close Charge Port"
+    description: "Close the Tesla charge port"
+    shortcut_arguments:
+      action: vehicle.charge_port.close
+      vehicle: default
+    examples:
+      - close the charge port
+      - close charge port
+      - lock the charger
+
+  - id: vehicle.media.set_volume
+    title: "Set Volume"
+    description: "Set the Tesla media volume"
+    shortcut_arguments:
+      action: vehicle.media.set_volume
+      vehicle: default
+    parameters:
+      - name: percent
+        type: number
+        description: "Volume level as percentage (0-100)"
+        required: true
+    examples:
+      - set volume to 50
+      - turn the volume to 30
+      - set car volume to 15
+      - volume 80
+
+  - id: vehicle.dog_mode.enable
+    title: "Enable Dog Mode"
+    description: "Turn on Tesla Dog Mode to keep the cabin at a safe temperature"
+    shortcut_arguments:
+      action: vehicle.dog_mode.enable
+      vehicle: default
+    examples:
+      - turn on dog mode
+      - enable dog mode
+      - activate dog mode
+      - keep the car cool for the dog
+
+  - id: vehicle.dog_mode.disable
+    title: "Disable Dog Mode"
+    description: "Turn off Tesla Dog Mode"
+    shortcut_arguments:
+      action: vehicle.dog_mode.disable
+      vehicle: default
+    examples:
+      - turn off dog mode
+      - disable dog mode
+      - dog mode off
+
+  - id: vehicle.camp_mode.enable
+    title: "Enable Camp Mode"
+    description: "Turn on Tesla Camp Mode to keep climate and power active"
+    shortcut_arguments:
+      action: vehicle.camp_mode.enable
+      vehicle: default
+    examples:
+      - turn on camp mode
+      - enable camp mode
+      - activate camp mode
+
+  - id: vehicle.camp_mode.disable
+    title: "Disable Camp Mode"
+    description: "Turn off Tesla Camp Mode"
+    shortcut_arguments:
+      action: vehicle.camp_mode.disable
+      vehicle: default
+    examples:
+      - turn off camp mode
+      - disable camp mode
+      - camp mode off
+
+  - id: vehicle.bioweapon_defense.enable
+    title: "Enable Bioweapon Defense Mode"
+    description: "Turn on Tesla Bioweapon Defense Mode for maximum air filtration"
+    shortcut_arguments:
+      action: vehicle.bioweapon_defense.enable
+      vehicle: default
+    examples:
+      - turn on bioweapon defense
+      - enable bioweapon defense mode
+      - activate air filtration
+
+  - id: vehicle.bioweapon_defense.disable
+    title: "Disable Bioweapon Defense Mode"
+    description: "Turn off Tesla Bioweapon Defense Mode"
+    shortcut_arguments:
+      action: vehicle.bioweapon_defense.disable
+      vehicle: default
+    examples:
+      - turn off bioweapon defense
+      - disable bioweapon defense mode
+      - deactivate air filtration
+
+  - id: vehicle.fart
+    title: "Fart"
+    description: "Play the Tesla fart sound"
+    shortcut_arguments:
+      action: vehicle.fart
+      vehicle: default
+    examples:
+      - fart in the car
+      - play the fart sound
+      - tesla fart
+      - make the car fart

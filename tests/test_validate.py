@@ -163,17 +163,67 @@ class TestValidateSkillYaml:
         assert any("bad-tag" in e and "not in tags.yaml" in e for e in errors)
         assert not any("valid-tag" in e and "not in tags.yaml" in e for e in errors)
 
-    def test_bridge_shortcut_requires_share_url(self, tmp_path):
+    def test_bridge_shortcut_requires_share_url_or_source(self, tmp_path):
         data = _valid_skill()
         data["bridge_shortcut"] = "my-shortcut"
         errors = self._write_and_validate(tmp_path, data)
-        assert any("bridge_shortcut_share_url" in e for e in errors)
+        assert len(errors) > 0
 
     def test_bridge_shortcut_with_share_url_valid(self, tmp_path):
         data = _valid_skill()
         data["bridge_shortcut"] = "my-shortcut"
         data["bridge_shortcut_share_url"] = "https://example.com/share"
         assert self._write_and_validate(tmp_path, data) == []
+
+    def test_bridge_shortcut_with_source_valid(self, tmp_path):
+        data = _valid_skill()
+        data["bridge_shortcut"] = "my-shortcut"
+        data["bridge_shortcut_source"] = "my-shortcut.cherri"
+        # Create the .cherri file so the file-existence check passes
+        (tmp_path / "my-shortcut.cherri").write_text("// cherri source")
+        assert self._write_and_validate(tmp_path, data) == []
+
+    def test_bridge_shortcut_both_url_and_source_rejected(self, tmp_path):
+        data = _valid_skill()
+        data["bridge_shortcut"] = "my-shortcut"
+        data["bridge_shortcut_share_url"] = "https://example.com/share"
+        data["bridge_shortcut_source"] = "my-shortcut.cherri"
+        (tmp_path / "my-shortcut.cherri").write_text("// cherri source")
+        errors = self._write_and_validate(tmp_path, data)
+        assert len(errors) > 0
+
+    def test_bridge_shortcut_source_must_end_in_cherri(self, tmp_path):
+        data = _valid_skill()
+        data["bridge_shortcut"] = "my-shortcut"
+        data["bridge_shortcut_source"] = "my-shortcut.txt"
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("does not match" in e for e in errors)
+
+    def test_bridge_shortcut_source_must_match_bridge_shortcut(self, tmp_path):
+        data = _valid_skill()
+        data["bridge_shortcut"] = "My Shortcut"
+        data["bridge_shortcut_source"] = "Wrong Name.cherri"
+        (tmp_path / "Wrong Name.cherri").write_text("// cherri source")
+        errors = self._write_and_validate(tmp_path, data)
+        assert any("must match bridge_shortcut name" in e for e in errors)
+
+    def test_bridge_shortcut_source_matching_name_valid(self, tmp_path):
+        data = _valid_skill()
+        data["bridge_shortcut"] = "My Shortcut"
+        data["bridge_shortcut_source"] = "My Shortcut.cherri"
+        (tmp_path / "My Shortcut.cherri").write_text("// cherri source")
+        assert self._write_and_validate(tmp_path, data) == []
+
+    def test_bridge_shortcut_source_file_must_exist(self, tmp_path):
+        from validate import validate_skill_yaml
+
+        data = _valid_skill()
+        data["bridge_shortcut"] = "my-shortcut"
+        data["bridge_shortcut_source"] = "missing.cherri"
+        f = tmp_path / "skill.yaml"
+        f.write_text(yaml.dump(data, default_flow_style=False))
+        errors = validate_skill_yaml(f, "test-skill", set())
+        assert any("does not exist" in e for e in errors)
 
     def test_languages_must_be_string_array(self, tmp_path):
         data = _valid_skill()
